@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<codex>
+	<grimoire name="test">
+		<section name="antivirus">
+			<maintainer>
+			Unmaintained
+			</maintainer>
+			<spell name="clamav" version="0.88.4">
+				<url>http://www.clamav.net</url>
+				<license>GPL</license>
+				<keywords>antivirus</keywords>
+				<short>Clam AntiVirus is an anti-virus toolkit for Unix</short>
+				<long>Clam AntiVirus is an anti-virus toolkit for Unix. The main purpose
+	of this software is the integration with mail servers (attachment
+	scanning). The package provides a flexible and scalable
+	multi-threaded daemon, a commandline scanner, and a tool for
+	automatic updating via Internet. The programs are based on a shared
+	library distributed with the Clam AntiVirus package, which you can
+	use in your own software.</long>
+				<source hash="signature">clamav-0.88.4.tar.gz
+				<source_url>http://easynews.dl.sourceforge.net/sourceforge/clamav/clamav-0.88.4.tar.gz</source_url>
+				</source>
+				<source hash="">clamav-0.88.4.tar.gz.sig
+				<source_url>http://easynews.dl.sourceforge.net/sourceforge/clamav/clamav-0.88.4.tar.gz.sig</source_url>
+				</source>
+			</spell>
+			<spell name="klamav" version="0.37">
+				<url>http://SourceForge.net/projects/klamav</url>
+				<license>GPL</license>
+				<keywords>antivirus kde</keywords>
+				<short>KDE interface to clamav</short>
+				<long>KDE interface to clamav</long>
+				<source hash="sha512:a02c5edd58382cb6163a155d1491580a9639af537aae2bd3d32d1577a38122c7e01c458904343fb5068ce17dad61c316acedfc83e8450e01254f6f749d0ae5d2">klamav-0.37-source.tar.gz
+				<source_url>http://easynews.dl.sourceforge.net/sourceforge/klamav/klamav-0.37-source.tar.gz</source_url>
+				</source>
+			</spell>
+		</section>
+	</grimoire>
+	<grimoire name="copytest">
+		<section name="antivirus">
+			<maintainer>
+			Unmaintained
+			</maintainer>
+			<spell name="clamav" version="0.88.4">
+				<url>http://www.clamav.net</url>
+				<license>GPL</license>
+				<keywords>antivirus</keywords>
+				<short>Clam AntiVirus is an anti-virus toolkit for Unix</short>
+				<long>Clam AntiVirus is an anti-virus toolkit for Unix. The main purpose
+	of this software is the integration with mail servers (attachment
+	scanning). The package provides a flexible and scalable
+	multi-threaded daemon, a commandline scanner, and a tool for
+	automatic updating via Internet. The programs are based on a shared
+	library distributed with the Clam AntiVirus package, which you can
+	use in your own software.</long>
+				<source hash="signature">clamav-0.88.4.tar.gz
+				<source_url>http://easynews.dl.sourceforge.net/sourceforge/clamav/clamav-0.88.4.tar.gz</source_url>
+				</source>
+				<source hash="">clamav-0.88.4.tar.gz.sig
+				<source_url>http://easynews.dl.sourceforge.net/sourceforge/clamav/clamav-0.88.4.tar.gz.sig</source_url>
+				</source>
+			</spell>
+			<spell name="klamav" version="0.37">
+				<url>http://SourceForge.net/projects/klamav</url>
+				<license>GPL</license>
+				<keywords>antivirus kde</keywords>
+				<short>KDE interface to clamav</short>
+				<long>KDE interface to clamav</long>
+				<source hash="sha512:a02c5edd58382cb6163a155d1491580a9639af537aae2bd3d32d1577a38122c7e01c458904343fb5068ce17dad61c316acedfc83e8450e01254f6f749d0ae5d2">klamav-0.37-source.tar.gz
+				<source_url>http://easynews.dl.sourceforge.net/sourceforge/klamav/klamav-0.37-source.tar.gz</source_url>
+				</source>
+			</spell>
+		</section>
+	</grimoire>
+</codex>
