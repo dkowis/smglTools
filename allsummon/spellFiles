@@ -1,0 +1,284 @@
+#!/bin/bash
+# this simply outputs the grimoire - spell: spellFile
+# used by another script in a hack
+#grab the sorcery stuffs
+. /etc/sorcery/config
+
+# a global variable!
+SEDFILE="/tmp/sed.xml"
+
+
+################################################################################
+# Hash functions
+################################################################################
+#uses the currently set spell
+function my_get_spell_sources() {
+	local foo
+	for foo in $(get_source_nums SOURCE); do
+		echo ${!foo}
+	done
+}
+
+# takes $1 for a specific number
+function my_get_spell_source_hash() {
+	local sourcevar=SOURCE${1}
+	local hashvar="${sourcevar}_HASH"
+	local ignorevar="${sourcevar}_IGNORE"
+
+	if [[ "${!hashvar}" == "" ]]; then
+		# no hash
+		if [[ "${!ignorevar}" == "signature" ]]; then
+			echo -n "${!ignorevar}"
+		else
+			local gpgvar="${sourcevar}_GPG"
+			if [[ "${!gpgvar}" == "" ]] ; then
+				# not a gpg either, must be MD5 or no hash!
+				local md5var="MD5[*]"
+				if [[ "${!md5var[$1]}" == "" ]]; then
+					# no verification provided!
+					echo -n "none"
+				else
+					#going to break the rules here and add md5: to it
+					echo -n "md5:${!md5var[$1]}"
+				fi
+			else
+				echo -n ${!gpgvar}
+			fi
+		fi
+	else
+		echo -n ${!hashvar}
+	fi
+}
+
+function my_get_spell_source_hashes() {
+	local foo
+	for foo in $(get_source_nums); do
+		my_get_spell_source_hash $foo
+	done
+}
+
+#uses the current spell and a number, or no number 
+# barfs all the URLS for that source
+function my_get_spell_source_urls() {
+	local bar
+	local urlvar="SOURCE${1}_URL[*]"
+
+	for bar in ${!urlvar}; do
+		echo $bar
+	done
+}
+
+function my_get_all_spell_source_urls() {
+	local foo
+
+	for foo in $(get_source_nums); do
+		my_get_spell_source_urls $foo
+	done
+}
+################################################################################
+# END hash functions
+################################################################################
+
+function xml_safe() {
+	# $1 is the input string
+#	local string="$1"
+#	string="${string//</&lt;}"
+#	string="${string//>/&gt;}"
+#	string="${string//&/&amp;}"
+#	string="${string//\"/&quot;}"
+#	string="${string//\'/&#39;}"
+#	echo "$string"
+# SPEED TEST
+echo -n "$1"
+#	echo -n "$1" | sed -f $SEDFILE
+}
+
+function prepare_sed_xml_file() {
+	# writes out the xml.sed file to /tmp
+cat > $SEDFILE <<EOL
+#some sed recipies to make sure that xml is nice n friendly
+s/</\&lt;/g
+s/>/\&gt;/g
+s/\&/\&amp;/g
+s/"/\&quot;/g
+s/'/\&#39;/g
+s/ $//g
+EOL
+}
+
+function multi_line_xml_safe() {
+	# stdin is the multiple lines
+	#TODO: I think this may need work. sed-f may work better...
+	#while read -t 1 line; do
+	#	echo "$(xml_safe "$line")"
+	#done
+	#sed -f $SEDFILE
+	while read -t 1 line; do
+		echo "$line"
+	done
+}
+
+function usage() {
+	echo "Usage: grimoire2xml grimoire1 grimoire2"
+	echo "Usage: grimoire2xml all"
+}
+
+function scrapeCodex() {
+
+	# Arguments are the grimoires to scrape
+	local grimoire
+
+	# this is the only time we don't append. so that it overwrites
+	#set up the encoding for the xml file, needed to make some things work
+
+	for grimoire in "$@" ; do
+		# scrape each grimoire
+		scrapeGrimoire $grimoire
+	done
+	
+}
+
+
+function scrapeGrimoire() {
+	#$1 is the grimoire name to do the scraping on
+	
+	# Local variables
+	local grimoire_name
+	local grimoire_path
+	local section_name
+	local section_path
+
+	#get the necessary grimoire metadata
+	grimoire_name=$1
+	grimoire_path=$(codex_canonicalize_grimoire_name $grimoire_name lookup)
+
+	#output the xml for the grimoire first
+	# this will keep the slashes out, and it still works
+	#echo "$(basename $grimoire_name):"
+	
+	#get all the sections
+	# for each section call the section function :D
+	for section_path in $(codex_get_all_sections $grimoire_path); do
+		section_name="$(basename ${section_path})"
+		scrapeSection $grimoire_path $section_name
+	done
+}
+
+function scrapeSection() {
+	#$1 is the grimoire path Ex: /var/lib/sorcery/codex/test/
+	#$2 is the section name  Ex: antivirus
+
+	local grimoire_path=$1
+	local section_name=$2
+	local section_path="$grimoire_path/$section_name"
+	local spell_path
+	local spell_name
+
+	#echo "  $section_name:"
+
+	# get all the spells in this section
+	# run the spell function for each spell
+	for spell_path in $(codex_get_spells_in_section $section_path); do
+		spell_name="$(basename $spell_path)"
+		( scrapeSpell $section_path $spell_name )
+	done
+}
+
+function scrapeSpell() {
+	#$1 is the section path
+	#$2 is the spell name
+	
+	local section_path=$1
+	local spell_name=$2
+	local spell_path="$section_path/$spell_name"
+	local source_var
+	local source_num
+	local source_url
+
+	codex_set_current_spell $spell_path
+
+	local grimoire_name=$(echo "$section_path" | awk 'BEGIN { FS= "/"} ; { i=NF-1; print $i;}')
+	
+	#get all the spell elements
+	#echo "$spell_name:"
+	
+	# for each source get the source, it verification, and the url for it
+	for source_var in $(get_source_nums SOURCE) ; do
+		source_num="${source_var##SOURCE}"
+		source_var="SOURCE${source_num}"
+		actual_source="${!source_var## }"
+		actual_hash="$(my_get_spell_source_hash ${source_num})"
+		# need to check and see if it ends in a :
+
+		if [[ "${actual_source}" != "" ]]; then
+			# w00ts got a source!
+			# get the source hash and the name
+		#	echo "        sources:"
+			echo "$grimoire_name - $spell_name: ${actual_source}"
+			for source_url in $(my_get_spell_source_urls ${source_num}); do
+				# should remove spaces
+				source_url=${source_url// /}
+				if [[ "$source_url" != "" ]]; then
+					true
+		#			echo "          - $source_var: ${source_url}"
+				fi
+			done #done with source_urls for that source
+		fi #didn't have any sources
+	done #done with sources and hashes
+}
+
+###############################################################################
+# actual stuff starts here!
+# arguments are just grimoires or all
+
+if [[ "$BASH_ARGC" == "" ]]; then
+	usage
+	exit 1
+fi
+
+grimoirePath=""
+
+# now parse arguments to pass a path directly to a grimoire
+while getopts g: o ; do
+	case "$o" in
+		g) grimoirePath="$OPTARG";;
+	esac
+done
+
+#reset $@
+shift $(($OPTIND-1))
+
+#make sure I've got an xml.sed for me to use
+prepare_sed_xml_file
+
+grimoire_list=""
+if [[ "$grimoirePath" != "" ]]; then
+	codex_set_grimoires $grimoirePath
+	grimoire_list="$grimoirePath"
+else
+	for grimoire in "$@"; do
+		if [[ "$grimoire" != "all" ]]; then
+			if codex_find_grimoire $grimoire 2>&1 1>/dev/null; then
+				grimoire_list="$grimoire_list $grimoire"
+			else
+				if [[ "$SILENT" == "" ]]; then
+					echo "Dropping grimoire $grimoire, as it doesn't exist!"
+				fi
+			fi
+		else
+			grimoire_list="all"
+		fi
+
+	done
+fi
+
+grimoire_list=${grimoire_list# }
+
+if [[ "$grimoire_list" == "all" ]]; then
+	grimoire_list=""
+	for grimoire in $(codex_get_all_grimoires); do
+		grimoire_list="$grimoire_list ${grimoire##*/}"
+	done
+fi
+
+scrapeCodex $grimoire_list

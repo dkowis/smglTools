@@ -1,0 +1,54 @@
+#!/bin/bash
+
+# run this after doing a threaded summon and it will generate a file
+# with all the failed spells and the file they failed on
+
+# A script to find all the failed spells during download
+# prepatory work to ensure we can actually run
+if ! [ -e spellFiles ] ; then
+	echo "can't find spellFiles!"
+	exit 1;
+fi
+
+logs=`find splits/ -iname *-summonLog`
+
+if ! [ -n "$logs" ]; then
+	echo "No summon logs exist, do the threaded summon first."
+	exit 1;
+fi
+
+
+# a list of all the source files that didn't work
+# egrep "(Download|Sanity).*failed" splits/*-summonLog | cut -d":" -f2 | sed -e "s/\o33\[[0-9]\?[0-9]m//g" | awk '{i=NF-1; print $i}' | sort | uniq
+# not including -cvs or -svn ones
+# egrep "(Download|Sanity).*failed" splits/*-summonLog | cut -d":" -f2 | sed -e "s/\o33\[[0-9]\?[0-9]m//g" | awk '{i=NF-1; print $i}' | sort | uniq | egrep -v "(-svn|-cvs)"
+
+# use the spellFiles binary to start dumping data to a file
+allFiles="./allSpellFiles"
+failedFiles=`mktemp`
+failedSpells="./failedSpellFiles"
+
+echo -n "Collecting failures, either download or sanity check..."
+egrep "(Download|Sanity).*failed" splits/*-summonLog | cut -d":" -f2 | sed -e "s/\o33\[[0-9]\?[0-9]m//g" | awk '{i=NF-1; print $i}' | sort | uniq | egrep -v "(-svn|-cvs)" > $failedFiles
+echo "done."
+
+if ! [ -e $allFiles ] ; then
+	echo "Dumping spell files into $allFiles."
+	echo "this will take a while... (14 minutes on my machine :( )"
+	# TODO: calculate this when we do an allsummon so we don't have to do it twice...
+	./spellFiles all > $FILE
+else
+	echo "I'm reusing an old allFiles list, if you want to generate a new one"
+	echo "(TAKES A LONG TIME, 15+minutes) then:"
+	echo "rm  $allFiles"
+fi
+
+# when that's done we can correlate spell names to files
+# for foo in `cat output`; do egrep "${foo}$" allFiles; done | less
+echo -n "Finding out what spells' files failed..."
+for foo in `cat $failedFiles`; do 
+	egrep "${foo}$" $allFiles
+done > $failedSpells
+echo "done."
+
+echo "Look in $failedSpells for the info you seek."

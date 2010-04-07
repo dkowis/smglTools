@@ -1,0 +1,9 @@
+#!/bin/bash
+
+. /etc/sorcery/config
+
+#for grimoire in grimoires, do get all spells
+# for each spell in each grimoire, download all the sources for each spell
+# probably should use sorcery's builtin download handler so that cvs and such
+# are handled accurately
+# use multiple downloader threads, via files or fifos?
