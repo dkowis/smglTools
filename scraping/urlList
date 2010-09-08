@@ -201,6 +201,11 @@ function scrapeSpell() {
 	echo "    $spell_name:"
 	echo "      version: $VERSION"
 	
+	# list out the source variables
+	echo "      source_vars:"
+	for source_var in $(get_source_nums SOURCE) ; do
+		echo "        - SOURCE${source_var##SOURCE}"
+	done
 	# for each source get the source, it verification, and the url for it
 	for source_var in $(get_source_nums SOURCE) ; do
 		source_num="${source_var##SOURCE}"
@@ -212,18 +217,20 @@ function scrapeSpell() {
 		if [[ "${actual_source}" != "" ]]; then
 			# w00ts got a source!
 			# get the source hash and the name
-			echo "      ${actual_source}:"
+			echo "      ${source_var}:"
+			echo "        file_name: ${actual_source}"
+
 			if [[ "$(echo "${actual_hash}" | grep :$ )" == "" ]]; then
 				echo "        verification: $(my_get_spell_source_hash ${source_num})"
 			else 
 				echo "        verification: MISSSING"
 			fi
-			echo "        sources:"
+			echo "        source_urls:"
 			for source_url in $(my_get_spell_source_urls ${source_num}); do
 				# should remove spaces
 				source_url=${source_url// /}
 				if [[ "$source_url" != "" ]]; then
-					echo "          - $source_var: ${source_url}"
+					echo "          - ${source_url}"
 				fi
 			done #done with source_urls for that source
 		fi #didn't have any sources
