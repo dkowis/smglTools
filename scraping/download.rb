@@ -1,3 +1,4 @@
+require 'digest'
 require 'yaml'
 require 'open-uri'
 require 'pp'
@@ -24,14 +25,35 @@ class SpellSource
 		#TODO: download the file
 	end
 
-	def verify
+	def verify(which = :first)
 		#TODO: verify the file
 	end
 
+	def verify_local
+		#TODO: hardcoded /var/spool/sorcery dir right now
+		local = File.join("/var/spool/sorcery", @file_name)
+		if File.exists? local then
+			internal_verify(local)
+		else
+			puts "File #{local.to_s} does not exist"
+		end
+	end
+
+	def internal_verify(file)
+		if @verification.starts_with? "sha512" then
+			puts "verification starts with sha512"
+			puts "Specified: #{@verification[@verification.index(":")..@verification.length]}"
+			puts "calculated: #{Digest::SHA512.file(file).hexdigest}"
+			# do the sha512 verification of the file
+			@verification[@verification.index(":"),-0] == Digest::SHA512.file(file).hexdigest
+		end
+	end
 end
 	
 # a class to contain the spell data
 class Spell
+	attr_reader :sources, :name, :version
+
 	def parse(spell)
 		#puts "=================================="
 		#pp spell
@@ -57,7 +79,7 @@ class Spell
 			@sources << source
 		end
 	end
-end
+end # of Spell class
 
 # older methods follow
 
@@ -162,7 +184,15 @@ section[1].each do |spell|
 	#puts "verified!"
 	s = Spell.new
 	s.parse(spell)
-	pp s
+	puts "Verifying local files for: #{s.name}"
+	s.sources.each do |source|
+		if source.verify_local then
+			puts "#{source.file_name} verified"
+		else
+			puts "#{source.file_name} not verified"
+		end
+	end
+	puts "\n"
 	#sub.each do |key, value|
 	#puts "key:   #{key}"
 	#puts "value: #{value}"
