@@ -14,6 +14,10 @@ end
 
 # a class to contain the spell sources
 class SpellSource
+	def initialize
+		@urls = []
+	end
+
 	attr_accessor :file_name, :urls, :verification
 
 	def download
@@ -29,32 +33,33 @@ end
 # a class to contain the spell data
 class Spell
 	def parse(spell)
+		#puts "=================================="
+		#pp spell
+		#puts "\n\n\n"
+
 		@sources = []
-		# load in the data from the yaml madness
 		# spell name
 		@name = spell[0]
-		puts "Spell name is: #{@name}"
 
-		#next follows an array of hashes that is the sources
-		spell[1].each do |sources|
-			puts "one of the sources is:"
+		#spell data is the hash
+		spell_data = spell[1]
+		@version = spell_data["version"]
+
+		# for each of the source vars do some more madness!
+		spell_data["source_vars"].each do |name|
 			source = SpellSource.new
-			source.file_name = sources[0]
-			puts "it's file name is #{source.file_name}"
-			# then I have a hash with a couple keys, 'verification' and 'sources'
-			source.verification = sources[1]["verification"]
-			# bah I can't quite remember how to do this the 'ruby way'
-			array = []
-			sources[1]["sources"].each {|x|
-				# my yaml construction is retarded, because this is somehow an array of hashes
-				# have to get the first value and then it behaves better...
-				array << x.values[0]
-			}
-			source.urls = array
+			source.file_name = spell_data[name]["file_name"]
+			source.verification = spell_data[name]["verification"]
+
+			spell_data[name]["source_urls"].each do |url|
+				source.urls << url
+			end
 			@sources << source
 		end
 	end
 end
+
+# older methods follow
 
 def download_spell(spell)
 	sourcefiles = {}
