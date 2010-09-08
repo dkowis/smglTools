@@ -21,8 +21,12 @@ class SpellSource
 
 	attr_accessor :file_name, :urls, :verification
 
-	def download
+	def download_url(url)
 		#TODO: download the file
+		begin 
+			pbar = nil
+			open(url,
+					 :content_length_proc => lambda 
 	end
 
 	def verify(which = :first)
@@ -39,13 +43,22 @@ class SpellSource
 		end
 	end
 
+	def specified_hash
+		if !@specified_hash then
+			if @verification.starts_with? "sha512" then #TODO: add more hashes
+				@specified_hash = @verification[(@verification.index(":")+1)..@verification.length]
+			end
+		end
+		@specified_hash
+	end
+
 	def internal_verify(file)
 		if @verification.starts_with? "sha512" then
-			puts "verification starts with sha512"
-			puts "Specified: #{@verification[@verification.index(":")..@verification.length]}"
-			puts "calculated: #{Digest::SHA512.file(file).hexdigest}"
+			#puts "verification starts with sha512"
+			#puts "Specified: #{specified_hash}"
+			#puts "calculated: #{Digest::SHA512.file(file).hexdigest}"
 			# do the sha512 verification of the file
-			@verification[@verification.index(":"),-0] == Digest::SHA512.file(file).hexdigest
+			specified_hash == Digest::SHA512.file(file).hexdigest
 		end
 	end
 end
