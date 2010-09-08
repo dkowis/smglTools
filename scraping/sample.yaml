@@ -1,5 +1,16 @@
 stable:
   antivirus:
+    epm:
+      version: 4.1
+      source_vars:
+        - SOURCE
+      SOURCE:
+        file_name: epm-4.1-source.tar.bz2
+        verification: sha512:34ba395523ca92ca27dd24aae6c7cfea0b1756e83e78edc84a6fa9e9cda36e240d2de78f73205836ee93bf0e44df8d43cdb6d11ddb824b27f63c0fafe0b096b5
+        source_urls:
+          - http://ftp.easysw.com/pub/epm/4.1/epm-4.1-source.tar.bz2
+          - http://www.nu6.org/_/mirror/ftp.easysw.com/pub/epm/4.1/epm-4.1-source.tar.bz2
+          - http://ftp.funet.fi/pub/mirrors/ftp.easysw.com/pub/epm/4.1/epm-4.1-source.tar.bz2
     clamav:
       version: 0.96.1
       source_vars:
