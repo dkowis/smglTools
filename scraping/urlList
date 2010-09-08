@@ -199,6 +199,7 @@ function scrapeSpell() {
 	
 	#get all the spell elements
 	echo "    $spell_name:"
+	echo "      version: $VERSION"
 	
 	# for each source get the source, it verification, and the url for it
 	for source_var in $(get_source_nums SOURCE) ; do
