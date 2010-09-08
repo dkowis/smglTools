@@ -17,20 +17,74 @@ end
 class SpellSource
 	def initialize
 		@urls = []
+		@fail = {}
 	end
 
-	attr_accessor :file_name, :urls, :verification
+	attr_accessor :file_name, :urls, :verification, :fail
+
+	def download
+		# goes through the urls until one is successful or fails
+		got_file = nil
+		@urls.each do |url|
+			got_file = download_url(url)
+			break if got_file
+		end
+		got_file
+	end
 
 	def download_url(url)
 		#TODO: download the file
+		downloaded = nil
 		begin 
 			pbar = nil
-			open(url,
-					 :content_length_proc => lambda 
+			url_file = open(url,
+					 :content_length_proc => lambda { |t|
+				if t && 0 < t then
+					pbar = ProgressBar.new(url.to_s, t)
+					pbar.file_transfer_mode
+				end
+			},
+				:progress_proc => lambda {|s|
+				pbar.set s if pbar
+			})
+			downloaded = Tempfile.new("download")
+			downloaded.write(url_file.read)
+			puts
+			# downloaded should be the file it's gotten
+		rescue Exception
+			# should I raise the exception? I should log it or something
+			@fail[url] = $!
+			#puts "Exception caught while trying to download file from url: #{url}\n\t#{$!}"
+			downloaded = nil
+		end
+		downloaded
 	end
 
 	def verify(which = :first)
-		#TODO: verify the file
+		#TODO: download and verify the spell source
+		if which == :first then
+			#only grab the first url and verify it
+			if @urls.length > 0
+				file = download_url(@urls[0])
+				if file
+					internal_verify file
+				else
+					puts "File failed to download from #{@urls[0]}\n\t#{@fail[@urls[0]]}"
+				end
+			else
+				puts "no urls exist!"
+			end
+		else
+			#go through and verify each one
+			@urls.each do |url|
+				file = download_url(url)
+				if file
+					internal_verify file
+				else 
+					puts "File failed to download from #{url}\n\t#{@fail[url]}"
+				end
+			end
+		end
 	end
 
 	def verify_local
@@ -96,40 +150,6 @@ end # of Spell class
 
 # older methods follow
 
-def download_spell(spell)
-	sourcefiles = {}
-	puts "Starting download of spell"
-	temp = Tempfile.new("#{spell[0]}") #spell name
-	spell[1].each do |file,data|
-	begin
-		# yeah, my yaml code is pretty crappy at this point
-		data["sources"].each.each do |source|
-			source.each do |sourcevar, url|
-				# download the sources for this spell
-				pbar = nil
-				open(url,
-						 :content_length_proc => lambda {|t|
-					if t && 0 < t
-						pbar = ProgressBar.new(file,t)
-						pbar.file_transfer_mode
-					end
-				},
-					:progress_proc => lambda {|s|
-					pbar.set s if pbar
-				}) do |f|
-					# f is the file
-					puts "nothing!"
-				end
-			end
-		end
-	rescue Exception
-		#TODO something with the exception?
-		puts "nothing!"
-	end
-	end
-end
-
-
 
 def verify_spell(spell)
 	puts "starting to verify this"
@@ -192,9 +212,6 @@ puts "grimoire: #{grimoire[0]}"
 section = grimoire[1].first
 puts "Section: #{section[0]}"
 section[1].each do |spell|
-	#puts "Verifying Spell: #{spell[0]}"
-	#verify_spell(spell)
-	#puts "verified!"
 	s = Spell.new
 	s.parse(spell)
 	puts "Verifying local files for: #{s.name}"
@@ -204,39 +221,11 @@ section[1].each do |spell|
 		else
 			puts "#{source.file_name} not verified"
 		end
+		# verify!
+		puts "verifying sources"
+		source.verify(:all)
 	end
 	puts "\n"
-	#sub.each do |key, value|
-	#puts "key:   #{key}"
-	#puts "value: #{value}"
-	#end
 end
 
-
-
-
-if false then
-	codex.each do |grimoire,gvalue|
-		puts "Grimoire: #{grimoire}"
-		gvalue.each do |section,svalue|
-			puts "\tSection: #{section}"
-			if svalue then
-				svalue.each do |spell,sourceFile|
-					puts "\t\tSpell: #{spell}"
-					if sourceFile then
-						sourceFile.each do |file,more|
-							puts "\t\t\tSource File:  #{file}"
-							puts "\t\t\tVerification: #{more['verification']}"
-						end
-					else
-						puts "\t\t\tNo source files"
-					end
-				end
-			else
-				puts "\t\tNo additional data"
-			end
-		end
-	end
-end
-
-puts "all done!"
+puts "All done!"
