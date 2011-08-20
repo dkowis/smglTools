@@ -1,3 +1,28 @@
-require 'rspec/core/rake_task'
+require 'bundler'
 
-RSpec::Core::RakeTask.new(:spec)
+begin
+  Bundler.setup(:default, :development, :test)
+rescue Bundler::BundlerError => e
+  $stderr.puts e.message
+  $stderr.puts "Run `bundle install` to install missing gems"
+  exit e.status_code
+end
+#require 'rake'
+#Bundler::GemHelper.install_tasks
+
+
+require 'rspec/core'
+require 'rspec/core/rake_task'
+require 'cucumber/rake/task'
+
+
+Cucumber::Rake::Task.new(:cucumber)
+Cucumber::Rake::Task.new(:wip) do |wip|
+  wip.cucumber_opts = "-p wip"
+end
+
+RSpec::Core::RakeTask.new(:spec) do |spec|
+  spec.pattern = FileList['spec/**/*_spec.rb']
+  spec.rspec_opts = "-cfd"
+end
+
