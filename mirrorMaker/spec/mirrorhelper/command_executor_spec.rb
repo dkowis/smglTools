@@ -3,7 +3,7 @@ require 'spec_helper'
 describe SourceMage::CommandExecutor do
 
   before do
-    @executor = SourceMage::CommandExecutor.new
+    @executor = SourceMage::CommandExecutor
   end
 
   it "executes commands locally" do

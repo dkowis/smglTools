@@ -2,7 +2,7 @@ module SourceMage
   class CommandExecutor
 
 
-    def run_command(user, host=nil, command=nil)
+    def self.run_command(user, host=nil, command=nil)
       if host.nil? and command.nil?
         command = user
         `#{command}`.strip
