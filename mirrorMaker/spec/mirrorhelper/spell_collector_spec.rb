@@ -1,10 +1,8 @@
 require "spec_helper"
 
-describe "My behaviour" do
+describe SourceMage::Interface do
 
-  it "should do something" do
-
-    #To change this template use File | Settings | File Templates.
-    true.should == false
-  end
+  it "lists all the spells in the grimoire"
+  it "summons a spell from a grimoire"
+  it "lists all the grimoires available on a system"
 end
