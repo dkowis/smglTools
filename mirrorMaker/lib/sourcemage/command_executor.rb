@@ -5,9 +5,9 @@ module SourceMage
     def self.run_command(user, host=nil, command=nil)
       if host.nil? and command.nil?
         command = user
-        `#{command}`.strip
+        return `#{command}`.strip, $?.exitstatus
       elsif user and host and command
-        `ssh #{user}@#{host} #{command}`.strip
+        return `ssh #{user}@#{host} #{command}`.strip, $?.exitstatus
 
       else
         raise ArgumentError.new("wrong number of arguments, all three, or just one")
