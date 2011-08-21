@@ -1,0 +1,2 @@
+[36mFound source file [32m[1m/var/spool/sorcery/httpd-2.2.19.tar.bz2[0m for spell [37m[1m[40mapache22[0m in [32m[1m/var/spool/sorcery[0m
+[36mFound source file [32m[1m/var/spool/sorcery/httpd-2.2.19.tar.bz2.asc[0m for spell [37m[1m[40mapache22[0m in [32m[1m/var/spool/sorcery[0m

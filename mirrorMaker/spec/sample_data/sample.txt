@@ -1,0 +1,15 @@
+Grimoire:  sample
+
+SECTION: z-sample
+sample
+sample2
+sample3
+sample4
+
+SECTION: z-example
+example
+example2
+example3
+example4
+
+Total spells:  8
