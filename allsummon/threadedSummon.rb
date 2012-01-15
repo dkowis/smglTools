@@ -2,10 +2,10 @@ require 'progressbar'
 require 'open3'
 require 'thread'
 
-DOWNLOAD_THREADS = 4
+DOWNLOAD_THREADS = 8
 
 class SpellPair
-  attr_accessor :grimoire, :spell, :success
+  attr_accessor :grimoire, :spell, :success, :start_time, :end_time
   
   def initialize(grimoire, spell)
     @grimoire = grimoire
@@ -14,15 +14,22 @@ class SpellPair
   end
 
   def download
+    @start_time = Time.now
     #TODO: use POPEN3 so that I can munch off stderr and it won't be heard
     Open3.popen3(command) do |stdin, stdout, stderr, thread|
       stdout.read
       stderr.read
+      stdin.close
       thread.join
       if thread.value.exitstatus == 0
         @success = true
       end
     end
+    @stop_time = Time.now
+  end
+
+  def duration
+    @stop_time - @start_time
   end
 
   def command
@@ -39,6 +46,7 @@ end
 spell_names = Array.new
 Open3.popen3(". /etc/sorcery/config; codex_get_all_spells") do |stdin, stdout, stderr, thread|
   output = stdout.read
+  stdin.close
   stderr.read
   thread.join
   unless thread.value.exitstatus == 0
@@ -50,6 +58,7 @@ end
 
 grimoire = Hash.new
 
+all_spells = Array.new
 spells_to_download = Queue.new
 failed_spells = Queue.new
 
@@ -65,7 +74,9 @@ spell_names.each do |path|
     grimoire[grimoire_name][section_name] ||= Array.new
     grimoire[grimoire_name][section_name] << spell_name
     # create pairs of stuff to download
-    spells_to_download << SpellPair.new(grimoire_name, spell_name)
+    spell_pair = SpellPair.new(grimoire_name, spell_name)
+    spells_to_download << spell_pair
+    all_spells << spell_pair
   end
 end
 
@@ -115,3 +126,4 @@ failed_array.each do |spell_pair|
   #TODO: maybe do something more pretty
   puts "\t#{spell_pair}"
 end
+
