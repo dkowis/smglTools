@@ -16,6 +16,8 @@ class SpellPair
   def download
     #TODO: use POPEN3 so that I can munch off stderr and it won't be heard
     Open3.popen3(command) do |stdin, stdout, stderr, thread|
+      stdout.read
+      stderr.read
       thread.join
       if thread.value.exitstatus == 0
         @success = true
