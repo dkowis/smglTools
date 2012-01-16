@@ -58,7 +58,6 @@ end
 
 grimoire = Hash.new
 
-all_spells = Array.new
 spells_to_download = Queue.new
 failed_spells = Queue.new
 
@@ -76,7 +75,6 @@ spell_names.each do |path|
     # create pairs of stuff to download
     spell_pair = SpellPair.new(grimoire_name, spell_name)
     spells_to_download << spell_pair
-    all_spells << spell_pair
   end
 end
 
@@ -107,6 +105,7 @@ DOWNLOAD_THREADS.times do |x|
         failed_spells << spell_pair
       end
     end
+    puts "\t\tTHREAD #{x} COMPLETED"
   end
 end
 
