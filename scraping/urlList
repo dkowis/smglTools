@@ -220,9 +220,6 @@ done
 #reset $@
 shift $(($OPTIND-1))
 
-#make sure I've got an xml.sed for me to use
-prepare_sed_xml_file
-
 grimoire_list=""
 if [[ "$grimoirePath" != "" ]]; then
 	codex_set_grimoires $grimoirePath
