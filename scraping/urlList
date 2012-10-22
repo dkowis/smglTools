@@ -79,45 +79,6 @@ function my_get_all_spell_source_urls() {
 # END hash functions
 ################################################################################
 
-function xml_safe() {
-	# $1 is the input string
-#	local string="$1"
-#	string="${string//</&lt;}"
-#	string="${string//>/&gt;}"
-#	string="${string//&/&amp;}"
-#	string="${string//\"/&quot;}"
-#	string="${string//\'/&#39;}"
-#	echo "$string"
-# SPEED TEST
-echo -n "$1"
-#	echo -n "$1" | sed -f $SEDFILE
-}
-
-function prepare_sed_xml_file() {
-	# writes out the xml.sed file to /tmp
-cat > $SEDFILE <<EOL
-#some sed recipies to make sure that xml is nice n friendly
-s/</\&lt;/g
-s/>/\&gt;/g
-s/\&/\&amp;/g
-s/"/\&quot;/g
-s/'/\&#39;/g
-s/ $//g
-EOL
-}
-
-function multi_line_xml_safe() {
-	# stdin is the multiple lines
-	#TODO: I think this may need work. sed-f may work better...
-	#while read -t 1 line; do
-	#	echo "$(xml_safe "$line")"
-	#done
-	#sed -f $SEDFILE
-	while read -t 1 line; do
-		echo "$line"
-	done
-}
-
 function usage() {
 	echo "Usage: grimoire2xml grimoire1 grimoire2"
 	echo "Usage: grimoire2xml all"
@@ -202,12 +163,13 @@ function scrapeSpell() {
 	echo "      version: $VERSION"
 	
 	# list out the source variables
-	echo "      source_vars:"
-	for source_var in $(get_source_nums SOURCE) ; do
-		echo "        - SOURCE${source_var##SOURCE}"
-	done
+	#echo "      source_vars:"
+	#for source_var in $(get_source_nums SOURCE) ; do
+	#	echo "        - SOURCE${source_var##SOURCE}"
+	#done
 	# for each source get the source, it verification, and the url for it
 	for source_var in $(get_source_nums SOURCE) ; do
+    echo "      sources:"
 		source_num="${source_var##SOURCE}"
 		source_var="SOURCE${source_num}"
 		actual_source="${!source_var## }"
@@ -217,7 +179,7 @@ function scrapeSpell() {
 		if [[ "${actual_source}" != "" ]]; then
 			# w00ts got a source!
 			# get the source hash and the name
-			echo "      ${source_var}:"
+			echo "      -"
 			echo "        file_name: ${actual_source}"
 
 			if [[ "$(echo "${actual_hash}" | grep :$ )" == "" ]]; then
