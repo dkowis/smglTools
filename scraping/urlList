@@ -179,20 +179,20 @@ function scrapeSpell() {
 		if [[ "${actual_source}" != "" ]]; then
 			# w00ts got a source!
 			# get the source hash and the name
-			echo "      -"
-			echo "        file_name: ${actual_source}"
+			echo "        -"
+			echo "          file_name: ${actual_source}"
 
 			if [[ "$(echo "${actual_hash}" | grep :$ )" == "" ]]; then
-				echo "        verification: $(my_get_spell_source_hash ${source_num})"
+				echo "          verification: $(my_get_spell_source_hash ${source_num})"
 			else 
-				echo "        verification: MISSSING"
+				echo "          verification: MISSSING"
 			fi
-			echo "        source_urls:"
+			echo "          source_urls:"
 			for source_url in $(my_get_spell_source_urls ${source_num}); do
 				# should remove spaces
 				source_url=${source_url// /}
 				if [[ "$source_url" != "" ]]; then
-					echo "          - ${source_url}"
+					echo "            - ${source_url}"
 				fi
 			done #done with source_urls for that source
 		fi #didn't have any sources
