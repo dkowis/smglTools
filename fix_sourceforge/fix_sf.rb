@@ -6,6 +6,7 @@ input_file = ARGV[0]
 
 
 File.readlines(input_file).each do |spell|
+    spell = spell.strip
     urls = `gaze source_urls #{spell}`.split("\n")
     urls.each do |url|
         if url.include? "sourceforge"
