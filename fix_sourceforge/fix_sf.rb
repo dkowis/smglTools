@@ -7,7 +7,7 @@ input_file = ARGV[0]
 
 File.readlines(input_file).each do |spell|
     spell = spell.strip
-    urls = `gaze source_urls #{spell}`.split("\n")
+    urls = `gaze source_urls #{spell}`.split(/\s/)
     urls.each do |url|
         if url.include? "sourceforge"
             stdout, stderr, status = Open3.capture3("wget --tries=1 #{url} -O /dev/null")
