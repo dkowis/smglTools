@@ -37,9 +37,9 @@ spells.each do |spell|
         url = "http://downloads.sourceforge.net/project/#{spell}#{path}"
         stdout, stderr, status = Open3.capture3("wget --tries=1 \"#{url}\" -O /tmp/#{spell}.tar.gz")
         if status.success?
-            puts "SUCCESS #{spell} - #{url}"
+            puts "SUCCESS|#{spell}|#{url}"
         else
-            puts "   FAIL #{spell} - #{url}"
+            puts "FAIL|#{spell}|#{url}"
         end
     end
 end
