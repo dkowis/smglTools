@@ -24,23 +24,30 @@ class Working
     end
 end
 
-#spells = File.readlines(ARGV[0])
-spells = %w{gpac}
+spells = File.readlines(ARGV[0])
+
 
 work = Working.new
 spells.each do |spell|
     spell.strip!
+    spell, file = spell.split("|")
+
     work.find_spell(spell)
     if work.has_download_link?
         path = work.extract_path
-        puts "PATH is #{path}"
         url = "http://downloads.sourceforge.net/project/#{spell}#{path}"
-        stdout, stderr, status = Open3.capture3("wget --tries=1 \"#{url}\" -O /tmp/#{spell}.tar.gz")
+        stdout, stderr, status = Open3.capture3("wget --tries=1 \"#{url}\" -O /dev/null")
         if status.success?
-            puts "SUCCESS|#{spell}|#{url}"
+            if url.end_with? file
+                puts "SUCCESS|#{spell}|#{url}|#{file}"
+            else
+                puts "FILE|#{spell}|#{url}|#{file}"
+            end
         else
             puts "FAIL|#{spell}|#{url}"
         end
+    else
+        puts "FAIL|#{spell}|Isn't a project :("
     end
 end
 
