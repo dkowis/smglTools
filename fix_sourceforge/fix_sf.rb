@@ -9,7 +9,7 @@ File.readlines(input_file).each do |spell|
     urls = `gaze source_urls #{spell}`.split("\n")
     urls.each do |url|
         if url.include? "sourceforge"
-            stdout, stderr, status = Open3("wget --tries=1 #{url} -O /dev/null")
+            stdout, stderr, status = Open3.capture3("wget --tries=1 #{url} -O /dev/null")
             if status.success?
                 puts "SUCCESS #{spell} - #{url}"
             else
