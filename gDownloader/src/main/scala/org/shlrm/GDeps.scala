@@ -51,13 +51,19 @@ object GDeps extends App with LazyLogging {
   spellInfoStream.toList.map { f =>
     import scala.concurrent.duration._
     scala.concurrent.blocking {
-      val exitStatus = Await.result(f.exitStatus, 1 minute)
+      //Downloads of things could take a REALLY long time, wait 10 minutes for it to do whatever
+      try {
+        val exitStatus = Await.result(f.exitStatus, 10 minutes)
 
-      exitStatus match {
-        case 0 => logger.info(s"Successful download of $f")
-        case _ => {
-          logger.error(s"FAILED to download $f:\n${f.stdOut}\n")
+        exitStatus match {
+          case 0 => logger.info(s"Successful download of $f")
+          case _ => {
+            logger.error(s"FAILED to download $f:\n${f.stdOut}\n")
+          }
         }
+      } catch {
+        case e:Exception =>
+          logger.error(s"An exception was caught while awaiting a result for $f", e)
       }
     }
   }

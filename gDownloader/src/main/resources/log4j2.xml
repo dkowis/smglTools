@@ -5,6 +5,7 @@
             <PatternLayout pattern="%d{ABSOLUTE} [%t] %highlight{%-5level} %c{1.} - %msg%n"/>
         </Console>
         <File name="errorLog" fileName="failures.log">
+            <ThresholdFilter level="error" onMatch="ACCEPT" />
             <PatternLayout pattern="%d{ABSOLUTE} [%t] %highlight{%-5level} %c{1.} - %msg%n"/>
         </File>
         <Async name="async">
@@ -12,11 +13,9 @@
         </Async>
     </Appenders>
     <Loggers>
-        <Logger name="org.shlrm" level="error" additivity="true">
-            <AppenderRef ref="errorLog"/>
-        </Logger>
         <Root level="INFO">
             <AppenderRef ref="Console"/>
+            <AppenderRef ref="errorLog"/>
         </Root>
     </Loggers>
 </Configuration>

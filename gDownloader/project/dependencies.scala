@@ -16,7 +16,7 @@ object Dependencies {
 
   val deps = Seq(
     scalatest % "test",
-    scopt,
+    //scopt,
     log4j2_core,
     log4j2_api,
     log4j2_slf4j,
