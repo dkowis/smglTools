@@ -92,7 +92,7 @@ function spell_json() {
 { "version": "${VERSION}",  "source_files": ${source_files}}
 EOF
 
-        echo ${OUTPUT}
+        echo "${OUTPUT}"
 
         codex_clear_current_spell
 }
