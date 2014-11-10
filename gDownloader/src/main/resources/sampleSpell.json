@@ -1,0 +1,23 @@
+{
+  "version": "1.4.12",
+  "source_files": [
+    {
+      "file_name": "gnupg-1.4.12.tar.bz2",
+      "hash": "GnuPG.gpg:gnupg-1.4.12.tar.bz2.sig:VERIFIED_UPSTREAM_KEY",
+      "urls": [
+        "ftp://ftp.gnupg.org/gcrypt/gnupg/gnupg-1.4.12.tar.bz2",
+        "ftp://ftp.planetmirror.com/pub/gnupg/gnupg/gnupg-1.4.12.tar.bz2",
+        "ftp://sunsite.dk/pub/security/gcrypt/gnupg/gnupg-1.4.12.tar.bz2",
+        "ftp://ftp.franken.de/pub/crypt/mirror/ftp.gnupg.org/gcrypt/gnupg/gnupg-1.4.12.tar.bz2",
+        "ftp://ftp.linux.it/pub/mirrors/gnupg/gnupg/gnupg-1.4.12.tar.bz2"
+      ]
+    },
+    {
+      "file_name": "gnupg-1.4.12.tar.bz2.sig",
+      "hash": "signature",
+      "urls": [
+        "ftp://ftp.gnupg.org/gcrypt/gnupg/gnupg-1.4.12.tar.bz2.sig"
+      ]
+    }
+  ]
+}
