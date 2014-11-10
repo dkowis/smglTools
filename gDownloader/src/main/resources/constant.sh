@@ -58,14 +58,14 @@ function spell_json() {
         local source_var
         local source_url
 
-        local source_files="{"
+        local source_files="["
         # get all the sources and stick them into an array
         for source_var in $(get_source_nums SOURCE) ; do
             local source_num="${source_var##SOURCE}"
             source_var="SOURCE${source_num}"
             if [[ "${!source_var}" != "" ]]; then
-                # create a source entry and start an array for the urls
-                source_files="${source_files} \"${!source_var}\":{"
+                # create an object entry in the array for sources
+                source_files="${source_files} { \"file_name\": \"${!source_var}\","
                 # output the source hash for this source
                 source_files="${source_files} \"hash\": \"$(my_get_spell_source_hash ${source_num})\","
                 #In here, get each source url for this source
@@ -86,7 +86,7 @@ function spell_json() {
         source_files="${source_files%?}"
 
         # close the source files object
-        source_files="${source_files} }"
+        source_files="${source_files} ]"
 
         read -r -d '' OUTPUT <<EOF
 { "version": "${VERSION}",  "source_files": ${source_files}}
