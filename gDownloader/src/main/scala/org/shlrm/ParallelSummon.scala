@@ -4,7 +4,7 @@ import com.typesafe.scalalogging.LazyLogging
 
 import scala.concurrent.{Await, Future}
 
-object GDeps extends App with LazyLogging {
+object ParallelSummon extends App with LazyLogging {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 

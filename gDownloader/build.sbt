@@ -6,4 +6,4 @@ scalaVersion := "2.11.4"
 
 libraryDependencies ++= Dependencies.deps
 
-mainClass in Compile := Some("org.shlrm.GDeps")
+mainClass in Compile := Some("org.shlrm.ParallelSummon")
