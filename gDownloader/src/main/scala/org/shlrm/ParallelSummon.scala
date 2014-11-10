@@ -2,6 +2,7 @@ package org.shlrm
 
 import com.typesafe.scalalogging.LazyLogging
 
+import scala.annotation.tailrec
 import scala.concurrent.{Await, Future}
 
 object ParallelSummon extends App with LazyLogging {
@@ -47,26 +48,41 @@ object ParallelSummon extends App with LazyLogging {
   }
 
   logger.info("Created spellInfoStream")
+  //Need to not convert this stream to a list... It keeps too many things around
 
-  spellInfoStream.toList.map { f =>
-    import scala.concurrent.duration._
-    scala.concurrent.blocking {
-      //Downloads of things could take a REALLY long time, wait 10 minutes for it to do whatever
-      try {
-        val exitStatus = Await.result(f.exitStatus, 10 minutes)
+  /**
+   * Have to use this so that we throw objects away, so they can be collected, otherwise I'm keeping *ALL* the string
+   * output from every spell in memory. Derp.
+   * @param stream
+   */
+  @tailrec
+  def consumeStream(stream: Stream[SimpleSummoner]):Unit = {
+    if(stream.nonEmpty) {
+      //If the stream is non empty, take one, and do something with it, then recurse
+      val summon = stream.head
+      import scala.concurrent.duration._
+      scala.concurrent.blocking {
+        //Downloads of things could take a REALLY long time, wait 10 minutes for it to do whatever
+        try {
+          val exitStatus = Await.result(summon.exitStatus, 10 minutes)
 
-        exitStatus match {
-          case 0 => logger.info(s"Successful download of $f")
-          case _ => {
-            logger.error(s"FAILED to download $f:\n${f.stdOut}\n")
+          exitStatus match {
+            case 0 => logger.info(s"Successful download of $summon")
+            case _ => {
+              logger.error(s"FAILED to download $summon:\n${summon.stdOut}\n")
+            }
           }
+        } catch {
+          case e:Exception =>
+            logger.error(s"An exception was caught while awaiting a result for $summon", e)
         }
-      } catch {
-        case e:Exception =>
-          logger.error(s"An exception was caught while awaiting a result for $f", e)
       }
+
+      consumeStream(stream.tail)
     }
   }
+
+  consumeStream(spellInfoStream)
 
   logger.info("COMPLEATED")
 }
