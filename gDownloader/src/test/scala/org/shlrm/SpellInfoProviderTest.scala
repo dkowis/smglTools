@@ -15,52 +15,85 @@ class SpellInfoProviderTest extends FunSpec with Matchers {
   it("can parse a single requested payload into json!") {
     val provider = new SpellInfoProvider("/testConstant.sh")
 
-    val future = provider.spellInfo("test1")
+    try {
+      val future = provider.spellInfo("test1")
 
-    val result = Await.result(future, 2 seconds)
+      val result = Await.result(future, 2 seconds)
 
-    //Comparing the string representations works... this is super weird
-    result.toString shouldBe test1Spell.toString
-
-    provider.shutdown()
+      //Comparing the string representations works... this is super weird
+      result.toString shouldBe test1Spell.toString
+    } finally {
+      provider.shutdown()
+    }
   }
 
   it("can parse multiple requested payloads into json!") {
     val provider = new SpellInfoProvider("/testConstant.sh")
 
-    val future1 = provider.spellInfo("test1")
-    val future2 = provider.spellInfo("test1")
-    val future3 = provider.spellInfo("test1")
+    try {
+      val future1 = provider.spellInfo("test1")
+      val future2 = provider.spellInfo("test1")
+      val future3 = provider.spellInfo("test1")
 
-    val all: Future[List[Spell]] = Future.sequence(List(future1, future2, future3))
+      val all: Future[List[Spell]] = Future.sequence(List(future1, future2, future3))
 
-    val result = Await.result(all, 2 seconds)
+      val result = Await.result(all, 2 seconds)
 
-    result.foreach { r =>
-      r.toString shouldBe test1Spell.toString
+      result.foreach { r =>
+        r.toString shouldBe test1Spell.toString
+      }
+    } finally {
+      provider.shutdown()
     }
-    provider.shutdown()
   }
 
   it("can parse multiple different requested payloads") {
     val provider = new SpellInfoProvider("/testConstant.sh")
 
-    val things = Map(
-      "test1" -> test1Spell,
-      "test2" -> test2Spell,
-      "test3" -> test3Spell
-    )
+    try {
+      val things = Map(
+        "test1" -> test1Spell,
+        "test2" -> test2Spell,
+        "test3" -> test3Spell
+      )
 
-    val futures = things.map { case (k, v) =>
-      k -> provider.spellInfo(k)
+      val futures = things.map { case (k, v) =>
+        k -> provider.spellInfo(k)
+      }
+
+      futures.foreach { case (k, v) =>
+        val result = Await.result(v, 1 second)
+        result.toString shouldBe things(k).toString
+      }
+    } finally {
+      provider.shutdown()
     }
+  }
 
-    futures.foreach { case (k, v) =>
-      val result = Await.result(v, 1 second)
-      result.toString shouldBe things(k).toString
+  it("parses them even under load, keeping the stuff straight") {
+    val provider = new SpellInfoProvider("/testConstant.sh")
+
+    //Just hammer it a bunch of times, it should not fail!
+    try {
+      (1 to 100).foreach { x =>
+        val things = Map(
+          "test1" -> test1Spell,
+          "test2" -> test2Spell,
+          "test3" -> test3Spell
+        )
+
+        val futures = things.map { case (k, v) =>
+          k -> provider.spellInfo(k)
+        }
+
+        futures.foreach { case (k, v) =>
+          val result = Await.result(v, 1 second)
+          result.toString shouldBe things(k).toString
+        }
+      }
+    } finally {
+      provider.shutdown()
     }
-
-    provider.shutdown()
   }
 
   val test1Spell = Spell("/var/lib/sorcery/codex/stable/crypto/gnupg",

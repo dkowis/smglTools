@@ -23,8 +23,8 @@ object Dependencies {
 
   val deps = Seq(
     scalatest % "test",
-    akka,
-    akka_slf4j,
+    //akka,
+    //akka_slf4j,
     sprayJson,
     //scopt,
     log4j2_core,

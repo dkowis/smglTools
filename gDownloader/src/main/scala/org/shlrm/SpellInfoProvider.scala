@@ -91,6 +91,7 @@ class SpellInfoProvider(resource: String = "/constant.sh") {
       import scala.concurrent.blocking
       //send output to the shell program and get a line back...
       blocking {
+        //TODO: this still might have problems and things could get out of sync...
         toProcess.put(spellPath)
         val response = fromProcess.take()
         //JSON MARSHALLING TIME
