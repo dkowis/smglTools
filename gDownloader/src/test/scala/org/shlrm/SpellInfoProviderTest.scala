@@ -57,8 +57,6 @@ class SpellInfoProviderTest extends FunSpec with Matchers {
 
     futures.foreach { case (k, v) =>
       val result = Await.result(v, 1 second)
-
-      println(s"$k: ${result.toString}")
       result.toString shouldBe things(k).toString
     }
 
