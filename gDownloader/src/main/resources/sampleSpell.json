@@ -1,8 +1,9 @@
 {
+  "spellPath": "/var/lib/sorcery/codex/stable/crypto/gnupg",
   "version": "1.4.12",
-  "source_files": [
+  "sourceFiles": [
     {
-      "file_name": "gnupg-1.4.12.tar.bz2",
+      "fileName": "gnupg-1.4.12.tar.bz2",
       "hash": "GnuPG.gpg:gnupg-1.4.12.tar.bz2.sig:VERIFIED_UPSTREAM_KEY",
       "urls": [
         "ftp://ftp.gnupg.org/gcrypt/gnupg/gnupg-1.4.12.tar.bz2",
@@ -13,7 +14,7 @@
       ]
     },
     {
-      "file_name": "gnupg-1.4.12.tar.bz2.sig",
+      "fileName": "gnupg-1.4.12.tar.bz2.sig",
       "hash": "signature",
       "urls": [
         "ftp://ftp.gnupg.org/gcrypt/gnupg/gnupg-1.4.12.tar.bz2.sig"
