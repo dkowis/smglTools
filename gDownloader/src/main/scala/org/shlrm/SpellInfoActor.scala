@@ -9,7 +9,7 @@ import akka.actor.Actor.Receive
 
 import scala.io.Source
 
-object SpellInfoActorProtocol extends SpellFormat {
+object SpellInfoActorProtocol {
 
   case class InfoRequest(path: String)
 
