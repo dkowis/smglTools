@@ -8,17 +8,10 @@ import scala.concurrent.{Await, Future}
 object ParallelSummon extends App with LazyLogging {
 
   import scala.concurrent.ExecutionContext.Implicits.global
+  import scala.sys.process._
 
   logger.info("Starting up!")
 
-  //Get all the spells
-
-  import scala.sys.process._
-
-  //NOTE: have to execute everything inside of some bash
-  val lines = Seq("bash", "-c", ". /etc/sorcery/config; codex_get_all_spells").lineStream
-
-  logger.debug("After linestream!")
 
   case class SimpleSummoner(grimoire: String, section: String, spell: String) {
 
@@ -39,13 +32,22 @@ object ParallelSummon extends App with LazyLogging {
     }
   }
 
-  val spellInfoStream = lines.map { l =>
+  //NOTE: have to execute everything inside of some bash
+  //Get all the spells
+  // Always use a def for streams, not a val, you want to not keep it all around forever!
+  def spellStream = Seq("bash", "-c", ". /etc/sorcery/config; codex_get_all_spells").lineStream.map {l =>
     logger.debug(s"Found spell $l")
 
     val triad = l.replaceAll("/var/lib/sorcery/codex/", "").split("/")
 
     SimpleSummoner(triad(0), triad(1), triad(2))
   }
+
+//  val iterator = spellStream.toIterator
+//
+//  iterator.foreach { item =>
+//
+//  }
 
   logger.info("Created spellInfoStream")
   //Need to not convert this stream to a list... It keeps too many things around
@@ -82,7 +84,7 @@ object ParallelSummon extends App with LazyLogging {
     }
   }
 
-  consumeStream(spellInfoStream)
+  consumeStream(spellStream)
 
   logger.info("COMPLEATED")
 }
