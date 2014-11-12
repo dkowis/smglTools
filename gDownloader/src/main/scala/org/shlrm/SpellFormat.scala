@@ -9,10 +9,15 @@ object SpellFormat {
 
   case class SourceFile(fileName: String, hash: String, urls: List[String])
 
-  case class Spell(spellPath:String, version: String, sourceFiles: List[SourceFile])
+  case class Spell(spellPath: String, version: String, sourceFiles: List[SourceFile])
 
   object SpellFormatProtocol extends DefaultJsonProtocol {
     implicit val sourceFileFormat = jsonFormat3(SourceFile)
     implicit val spellFormat = jsonFormat3(Spell)
   }
+
+  case class SourceFileResult(sourceFile: SourceFile, result: String, successful: Boolean = true)
+
+  case class SummonResult(spell: Spell, sourceFileResults: List[SourceFileResult])
+
 }

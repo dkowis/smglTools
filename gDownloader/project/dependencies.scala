@@ -15,6 +15,8 @@ object Library {
   val akka = "com.typesafe.akka" %% "akka-actor" % akkaVersion
   val akka_slf4j = "com.typesafe.akka" %% "akka-slf4j" % akkaVersion
   val sprayJson = "io.spray" %% "spray-json" % "1.3.1"
+  val httpClient = "org.apache.httpcomponents" % "httpclient" % "4.3.6" exclude("commons-logging", "commons-logging")
+  val jclBridge = "org.slf4j" % "jcl-over-slf4j" % "1.7.7"
 }
 
 object Dependencies {
@@ -26,6 +28,8 @@ object Dependencies {
     //akka,
     //akka_slf4j,
     sprayJson,
+    httpClient,
+    jclBridge,
     //scopt,
     log4j2_core,
     log4j2_api,
