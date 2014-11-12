@@ -11,6 +11,7 @@ import scala.io.Source
 import scala.util.Success
 
 class SpellInfoProvider(resource: String = "/constant.sh") {
+
   import org.shlrm.SpellFormat._
 
   val tempFile = File.createTempFile("persistentSpellInfo", ".sh")
@@ -22,6 +23,8 @@ class SpellInfoProvider(resource: String = "/constant.sh") {
   import scala.sys.process._
 
   val stopped = new AtomicBoolean(false)
+
+  private val inputLock = new Object()
 
   val toProcess = new LinkedBlockingQueue[String]()
   val fromProcess = new LinkedBlockingQueue[String]()
@@ -92,8 +95,10 @@ class SpellInfoProvider(resource: String = "/constant.sh") {
       //send output to the shell program and get a line back...
       blocking {
         //TODO: this still might have problems and things could get out of sync...
-        toProcess.put(spellPath)
-        val response = fromProcess.take()
+        val response = inputLock.synchronized {
+          toProcess.put(spellPath)
+          fromProcess.take()
+        }
         //JSON MARSHALLING TIME
         try {
           import spray.json._
