@@ -17,5 +17,6 @@
             <AppenderRef ref="Console"/>
             <AppenderRef ref="errorLog"/>
         </Root>
+        <Logger name="org.shlrm" level="INFO"/>
     </Loggers>
 </Configuration>

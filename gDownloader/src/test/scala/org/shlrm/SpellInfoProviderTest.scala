@@ -70,12 +70,13 @@ class SpellInfoProviderTest extends FunSpec with Matchers {
     }
   }
 
+  //TODO: should use property based testing here for giggles
   it("parses them even under load, keeping the stuff straight") {
     val provider = new SpellInfoProvider("/testConstant.sh")
 
     //Just hammer it a bunch of times, it should not fail!
     try {
-      (1 to 100).foreach { x =>
+      (1 to 1000).foreach { x =>
         val things = Map(
           "test1" -> test1Spell,
           "test2" -> test2Spell,

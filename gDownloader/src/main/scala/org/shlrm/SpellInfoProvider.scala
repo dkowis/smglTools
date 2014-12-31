@@ -112,7 +112,8 @@ class SpellInfoProvider(resource: String = "/constant.sh") extends LazyLogging {
           logger.debug(s"Complete: SpellInfo: $spellPath")
           promise.complete(Success(marshalled))
         } catch {
-          case e: Exception => promise.failure(e)
+          case e: Exception =>
+            promise.failure(e)
         }
       }
     }
