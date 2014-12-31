@@ -47,7 +47,7 @@ object ParallelDownload extends App with LazyLogging {
     logger.info(s"acquired result for $spellPath")
     //Convert the sourcefile results into something I can read
     if (result.sourceFileResults.map(_.successful).forall(_ == true)) {
-      logger.info(s"Successful spell: $spellPath: ")
+      logger.info(s"All files successfully downloaded: $spellPath")
     } else {
       val sfResults = result.sourceFileResults.map{ sf =>
         s"${sf.sourceFile}: ${sf.result}"

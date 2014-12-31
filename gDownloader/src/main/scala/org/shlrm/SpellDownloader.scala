@@ -1,6 +1,7 @@
 package org.shlrm
 
 import java.io._
+import java.nio.file.{Paths, Files}
 
 import com.typesafe.scalalogging.LazyLogging
 import org.apache.http.client.methods.HttpGet
@@ -25,19 +26,32 @@ case class SpellDownloader(spell: Spell, client: CloseableHttpClient, executionC
    * @param file
    * @return
    */
-  def isDownloadNecessary(file: File): Boolean = {
-    if (!file.exists()) {
-      true
-    } else {
-      val url = file.toURI.toURL
-      val stream = url.openStream()
+  def isDownloadNecessary(sourceFile: SourceFile): Boolean = {
+    val destinationFile = new File(sourceRoot, sourceFile.fileName)
 
-      val size = try {
-        stream.available()
-      } finally {
-        stream.close()
+    //The file must not exist, or it must not be of sound integrity
+    !destinationFile.exists() && !verifyIntegrity(sourceFile, destinationFile)
+  }
+
+  /**
+   * Verify that the file was downloaded properly by checking it's signature or whatev
+   * @param downloaded
+   * @return
+   */
+  def verifyIntegrity(sourceFile: SourceFile, downloaded: File): Boolean = {
+    val simpleHash = "(.+):(.+)".r
+    val gpgVerify = "(.+):(.+\\.[sig|asc]):(.+)".r
+    sourceFile.hash match {
+      case gpgVerify(keyring, signatureFile, level) => {
+        //TODO: eventually verify gpg stuff
+        true
       }
-      size == 0
+      case simpleHash(algorithm, value) => {
+        //Do whatever based on algorithm
+        logger.info(s"Would validate ${sourceFile.fileName} with ${algorithm} expecting ${value}")
+        true
+      }
+      case _ => true
     }
   }
 
@@ -45,7 +59,7 @@ case class SpellDownloader(spell: Spell, client: CloseableHttpClient, executionC
     //Check to see if the file exists in /var/spool/sorcery
     val sourceFileResults = spell.sourceFiles.map { sourceFile =>
       val destination = new File(sourceRoot, sourceFile.fileName)
-      if (isDownloadNecessary(destination)) {
+      if (isDownloadNecessary(sourceFile)) {
         //It needs to be downloaded
         //TODO: just using first url now, because lameness
         if (sourceFile.urls.nonEmpty) {
@@ -73,7 +87,13 @@ case class SpellDownloader(spell: Spell, client: CloseableHttpClient, executionC
               response.close()
             }
             logger.info(s"Downloaded $url to ${destination.getAbsolutePath}")
-            SourceFileResult(sourceFile, "Downloaded!")
+
+            if (verifyIntegrity(sourceFile, destination)) {
+              SourceFileResult(sourceFile, "Downloaded!")
+            } else {
+              //TODO: if this fails, it should recurse somehow using a different source URL if possible
+              SourceFileResult(sourceFile, "FAILED VERIFICATION", successful = false)
+            }
           } else {
             logger.info(s"Unable to download internally: $url")
             //TODO: I cannot download this, fork to summon
