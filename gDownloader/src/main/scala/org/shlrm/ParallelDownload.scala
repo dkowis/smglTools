@@ -32,14 +32,19 @@ object ParallelDownload extends App with LazyLogging {
 
   val spellList: List[Future[SummonResult]] = Seq("bash", "-c", ". /etc/sorcery/config; codex_get_all_spells").lineStream.toList.map { l =>
     spellInfo.spellInfo(l).flatMap { spell =>
+      logger.debug(s"transforming $l into a SpellDownloader")
       SpellDownloader(spell, client, internalDownloaderEC).summonStatus.map(s => s)
     }
   }
 
-  spellList.foreach { f =>
+  logger.info("After collected spell info")
+
+  spellList.toIterator.foreach { f =>
+    logger.info("Awaiting result")
     val result = Await.result(f, 10 minutes)
 
     val spellPath = result.spell.spellPath
+    logger.info(s"acquired result for $spellPath")
     //Convert the sourcefile results into something I can read
     if (result.sourceFileResults.map(_.successful).forall(_ == true)) {
       logger.info(s"Successful spell: $spellPath")

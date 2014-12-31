@@ -3,14 +3,16 @@ package org.shlrm
 import java.io.{ByteArrayInputStream, File}
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
-import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.{Executors, LinkedBlockingQueue}
 import java.util.concurrent.atomic.AtomicBoolean
 
-import scala.concurrent.{Promise, Future}
+import com.typesafe.scalalogging.LazyLogging
+
+import scala.concurrent.{ExecutionContext, Promise, Future}
 import scala.io.Source
 import scala.util.Success
 
-class SpellInfoProvider(resource: String = "/constant.sh") {
+class SpellInfoProvider(resource: String = "/constant.sh") extends LazyLogging {
 
   import org.shlrm.SpellFormat._
 
@@ -19,7 +21,8 @@ class SpellInfoProvider(resource: String = "/constant.sh") {
   Files.write(tempFile.toPath, content.getBytes(StandardCharsets.UTF_8))
   tempFile.setExecutable(true, true)
 
-  import scala.concurrent.ExecutionContext.Implicits.global
+  //Need a limit on the number of threads that can exist, 4 is probably safe
+  implicit val singleExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4))
   import scala.sys.process._
 
   val stopped = new AtomicBoolean(false)
@@ -86,6 +89,7 @@ class SpellInfoProvider(resource: String = "/constant.sh") {
 
 
   def spellInfo(spellPath: String): Future[Spell] = {
+    logger.debug(s"Request: SpellInfo: $spellPath")
     if (stopped.get) {
       throw new Exception("STOPPED!")
     }
@@ -105,6 +109,7 @@ class SpellInfoProvider(resource: String = "/constant.sh") {
           import SpellFormatProtocol._
 
           val marshalled = response.parseJson.convertTo[Spell]
+          logger.debug(s"Complete: SpellInfo: $spellPath")
           promise.complete(Success(marshalled))
         } catch {
           case e: Exception => promise.failure(e)

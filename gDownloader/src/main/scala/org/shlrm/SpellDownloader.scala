@@ -1,6 +1,6 @@
 package org.shlrm
 
-import java.io.{BufferedOutputStream, File, FileOutputStream}
+import java.io.{BufferedInputStream, BufferedOutputStream, File, FileOutputStream}
 
 import com.typesafe.scalalogging.LazyLogging
 import org.apache.http.client.methods.HttpGet
@@ -9,6 +9,7 @@ import org.apache.http.impl.client.CloseableHttpClient
 import org.shlrm.SpellFormat._
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.io.Source
 import scala.sys.process.BasicIO
 
 case class SpellDownloader(spell: Spell, client:CloseableHttpClient, executionContext: ExecutionContext) extends LazyLogging {
@@ -34,10 +35,14 @@ case class SpellDownloader(spell: Spell, client:CloseableHttpClient, executionCo
             try {
               //Open the file for output
               val os = new BufferedOutputStream(new FileOutputStream(destination))
+              val input = new BufferedInputStream(response.getEntity.getContent)
               try {
-                BasicIO.transferFully(response.getEntity.getContent, os) //TODO: this might not be the right way to do things
+                Source.fromInputStream(input).map { c =>
+                  os.write(c)
+                }
               } finally {
                 os.close()
+                input.close()
               }
             } finally {
               response.close()
